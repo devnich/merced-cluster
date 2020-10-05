@@ -1,0 +1,96 @@
+#+STARTUP: showall indent
+#+OPTIONS: tex:t toc:nil H:6 ^:{}
+#+ODT_STYLES_FILE: "/Users/gilgamesh/Google Drive/Templates/styles.xml"
+
+#+TITLE: Merced Cluster Basics
+#+AUTHOR: Sarvani Chadalapaka
+
+* Overview
+- 1 "Head" node
+- 114 CPU compute nodes and 6 GPU compute nodes (ca. 3000 cores)
+- 128 GB or 256 GB RAM per node
+- Storage units (centralized and PI)
+
+* Infiniband
+- Can do direct writes (RDMA) optimized for MPI and other message-passing systems
+- ca. 3.7 x faster than 10 GB ethernet
+
+* Scheduler (SLURM)
+- Partial resource specification (JCL-style)
+
+* Architecture
+** Login node
+** Head node
+- scheduler
+- software installation
+- compute node management
+
+** User view
+*** /home
+- files, batch scripts, primary research data
+- 20 GB
+- virtualized, same path across all nodes
+*** /data
+- "non-primary" research data (i.e. research data with an alternative canonical source)
+*** /scratch
+- intermediate files and output
+- deleted every 4 weeks
+- 768 GB total for /data + /scratch
+*** /opt
+- virtualized, same path across all nodes
+- globally shared software
+
+* Queues and resource limitations
+- Max 350 CPUs at once
+- Practically speaking, up to 10% of the total capacity is available without waiting
+
+* Connecting
+1. Activate VPN
+2. SSH
+   #+BEGIN_SRC bash
+   ssh guest011@merced.ucmerced.edu   # or current user name
+
+   # Enter password when prompted
+   #+END_SRC
+
+* Running jobs
+**  Create Slurm job "sample.sub"
+Jobs follow "#SBATCH <arg>" syntax, one arg per line
+#+BEGIN_SRC bash
+#! /bin/bash
+#SBATCH --nodes=1
+#SBATCH --ntasks=1            # 1 CPU
+#SBATCH -p fastq
+#SBATCH --time=0-00:15:00     # 15 minutes
+#SBATCH --output=my_%j.stdout
+#SBATCH --job-name=test
+#SBATCH --export=ALL          # export all env variables
+
+whoami
+echo $HOSTNAME                # display compute node
+module load pgi
+#+END_SRC
+
+**  Submit job
+#+BEGIN_SRC bash
+sbatch sample.sub
+#+END_SRC
+
+** Check status
+#+BEGIN_SRC bash
+squeue -u guest011            # or current user name
+#+END_SRC
+
+** View all jobs
+#+BEGIN_SRC bash
+squeue
+#+END_SRC
+
+** Use additional software
+#+BEGIN_SRC bash
+module avail                 # show all available software
+module load anaconda3        # load module
+#+END_SRC
+
+* Cluster status
+http://mercedhead.ucmerced.edu/ganglia/
